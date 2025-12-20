@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import projectService, { ProjectFilters } from '../services/projectService';
-import { Project, PaginatedResponse } from '../types';
+import type { Project, PaginatedResponse } from '../types';
 
 interface UseProjectsState {
   projects: Project[];
