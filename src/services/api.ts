@@ -15,6 +15,23 @@ const api = axios.create({
   timeout: 30000 // 30 seconds timeout
 });
 
+export const handleApiError = (error: AxiosError | unknown): string => {
+  if (axios.isAxiosError(error)) {
+    const message =
+      (error.response?.data as { message?: string })?.message ||
+      error.message ||
+      'An unexpected error occurred.';
+
+    return message;
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return 'An unexpected error occurred.';
+};
+
 // Request interceptor - Add JWT token to requests
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
