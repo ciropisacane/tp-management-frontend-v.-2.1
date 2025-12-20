@@ -22,7 +22,7 @@ import {
   DELIVERABLE_TYPE_LABELS,
   PAGINATION_DEFAULTS
 } from '../../utils/constants';
-import { ProjectFilters } from '../../services/projectService';
+import type { ProjectFilters } from '../../services/projectService';
 
 const ProjectList = () => {
   const [filters, setFilters] = useState<ProjectFilters>({
@@ -388,5 +388,6 @@ const ProjectList = () => {
     </div>
   );
 };
+
 
 export default ProjectList;
