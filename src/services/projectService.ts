@@ -1,5 +1,5 @@
 import api from './api';
-import { Project, PaginatedResponse } from '../types';
+import type { Project, PaginatedResponse } from '../types';
 
 export interface ProjectFilters {
   status?: string;
