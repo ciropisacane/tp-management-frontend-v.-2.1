@@ -13,6 +13,10 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { useProjects } from '../../hooks/useProjects';
+import CreateProjectModal from '../../components/Projects/CreateProjectModal';
+import EditProjectModal from '../../components/Projects/EditProjectModal';
+import DeleteProjectModal from '../../components/Projects/DeleteProjectModal';
+import type { Project } from '../../types';
 import { formatDate, formatCurrency, truncateText } from '../../utils/formatters';
 import {
   PROJECT_STATUS_LABELS,
@@ -25,6 +29,11 @@ import {
 import type { ProjectFilters } from '../../services/projectService';
 
 const ProjectList = () => {
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  
   const [filters, setFilters] = useState<ProjectFilters>({
     page: PAGINATION_DEFAULTS.PAGE,
     limit: PAGINATION_DEFAULTS.LIMIT,
@@ -71,6 +80,18 @@ const ProjectList = () => {
     });
   };
 
+  // Handle edit
+  const handleEdit = (project: Project) => {
+    setSelectedProject(project);
+    setShowEditModal(true);
+  };
+
+  // Handle delete
+  const handleDelete = (project: Project) => {
+    setSelectedProject(project);
+    setShowDeleteModal(true);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -79,7 +100,10 @@ const ProjectList = () => {
           <h1 className="text-3xl font-bold text-gray-900">Projects</h1>
           <p className="text-gray-600 mt-2">Manage your Transfer Pricing projects</p>
         </div>
-        <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+        <button 
+          onClick={() => setShowCreateModal(true)}
+          className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        >
           <Plus className="w-5 h-5" />
           <span>New Project</span>
         </button>
@@ -310,12 +334,14 @@ const ProjectList = () => {
                           <Eye className="w-4 h-4" />
                         </Link>
                         <button
+                          onClick={() => handleEdit(project)}
                           className="p-1 text-gray-600 hover:bg-gray-50 rounded transition-colors"
                           title="Edit"
                         >
                           <Edit className="w-4 h-4" />
                         </button>
                         <button
+                          onClick={() => handleDelete(project)}
                           className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
                           title="Delete"
                         >
@@ -385,9 +411,48 @@ const ProjectList = () => {
           </div>
         </div>
       )}
+      
+      {/* Create Project Modal */}
+      <CreateProjectModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSuccess={() => {
+          refetch();
+          setShowCreateModal(false);
+        }}
+      />
+
+      {/* Edit Project Modal */}
+      <EditProjectModal
+        isOpen={showEditModal}
+        project={selectedProject}
+        onClose={() => {
+          setShowEditModal(false);
+          setSelectedProject(null);
+        }}
+        onSuccess={() => {
+          refetch();
+          setShowEditModal(false);
+          setSelectedProject(null);
+        }}
+      />
+
+      {/* Delete Project Modal */}
+      <DeleteProjectModal
+        isOpen={showDeleteModal}
+        project={selectedProject}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setSelectedProject(null);
+        }}
+        onSuccess={() => {
+          refetch();
+          setShowDeleteModal(false);
+          setSelectedProject(null);
+        }}
+      />
     </div>
   );
 };
-
 
 export default ProjectList;

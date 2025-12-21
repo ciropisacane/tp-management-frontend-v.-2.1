@@ -3,6 +3,7 @@ import { useAuthStore } from './store/authStore';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import ProjectList from './pages/Projects/ProjectList';
+import ProjectDetail from './pages/Projects/ProjectDetail';
 import MainLayout from './components/Layout/MainLayout';
 
 // Protected Route Component
@@ -53,7 +54,7 @@ function App() {
           
           {/* Projects routes */}
           <Route path="/projects" element={<ProjectList />} />
-          <Route path="/projects/:id" element={<PlaceholderPage title="Project Detail" />} />
+          <Route path="/projects/:id" element={<ProjectDetail />} />
           
           {/* Placeholder routes (da implementare) */}
           <Route path="/tasks" element={<PlaceholderPage title="Tasks" />} />
