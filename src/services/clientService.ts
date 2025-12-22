@@ -32,7 +32,20 @@ class ClientService {
     const response = await api.get<Client[]>('/clients', {
       params: { active: activeOnly }
     });
-    return response.data;
+    const payload = response.data as unknown;
+    if (Array.isArray(payload)) {
+      return payload;
+    }
+    if (payload && typeof payload === 'object') {
+      const objectPayload = payload as { data?: Client[]; clients?: Client[] };
+      if (Array.isArray(objectPayload.data)) {
+        return objectPayload.data;
+      }
+      if (Array.isArray(objectPayload.clients)) {
+        return objectPayload.clients;
+      }
+    }
+    return [];
   }
 
   // Get client by ID
