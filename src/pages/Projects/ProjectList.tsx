@@ -16,6 +16,7 @@ import { useProjects } from '../../hooks/useProjects';
 import CreateProjectModal from '../../components/Projects/CreateProjectModal';
 import EditProjectModal from '../../components/Projects/EditProjectModal';
 import DeleteProjectModal from '../../components/Projects/DeleteProjectModal';
+import { useAuthStore } from '../../store/authStore';
 import type { Project } from '../../types';
 import { formatDate, formatCurrency, truncateText } from '../../utils/formatters';
 import {
@@ -26,13 +27,14 @@ import {
   DELIVERABLE_TYPE_LABELS,
   PAGINATION_DEFAULTS
 } from '../../utils/constants';
-import type { ProjectFilters } from '../../services/projectService';
+import projectService, { type CreateProjectData, type ProjectFilters } from '../../services/projectService';
 
 const ProjectList = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const { user } = useAuthStore();
   
   const [filters, setFilters] = useState<ProjectFilters>({
     page: PAGINATION_DEFAULTS.PAGE,
@@ -90,6 +92,18 @@ const ProjectList = () => {
   const handleDelete = (project: Project) => {
     setSelectedProject(project);
     setShowDeleteModal(true);
+  };
+
+  const handleCreateProject = async (data: Omit<CreateProjectData, 'projectManagerId'>) => {
+    if (!user?.id) {
+      throw new Error('Unable to determine project manager. Please log in again.');
+    }
+
+    await projectService.createProject({
+      ...data,
+      projectManagerId: user.id
+    });
+    refetch();
   };
 
   return (
@@ -416,10 +430,7 @@ const ProjectList = () => {
       <CreateProjectModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
-        onSuccess={() => {
-          refetch();
-          setShowCreateModal(false);
-        }}
+        onSubmit={handleCreateProject}
       />
 
       {/* Edit Project Modal */}
