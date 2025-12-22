@@ -6,6 +6,7 @@ import {
   CheckSquare, 
   Users, 
   FileText,
+  Building2, // ← AGGIUNTO per Clients
   Settings,
   Menu,
   X
@@ -30,6 +31,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const menuItems: MenuItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
     { id: 'projects', label: 'Projects', icon: FolderKanban, path: '/projects' },
+    { id: 'clients', label: 'Clients', icon: Building2, path: '/clients' }, // ← AGGIUNTO
     { id: 'tasks', label: 'Tasks', icon: CheckSquare, path: '/tasks' },
     { id: 'team', label: 'Team', icon: Users, path: '/team' },
     { id: 'documents', label: 'Documents', icon: FileText, path: '/documents' },

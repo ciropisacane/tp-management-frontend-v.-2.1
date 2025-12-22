@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import ProjectList from './pages/Projects/ProjectList';
 import ProjectDetail from './pages/Projects/ProjectDetail';
 import MainLayout from './components/Layout/MainLayout';
+import Clients from './pages/Clients';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -55,6 +56,7 @@ function App() {
           {/* Projects routes */}
           <Route path="/projects" element={<ProjectList />} />
           <Route path="/projects/:id" element={<ProjectDetail />} />
+          <Route path="/clients" element={<ProtectedRoute><Clients /></ProtectedRoute>} />
           
           {/* Placeholder routes (da implementare) */}
           <Route path="/tasks" element={<PlaceholderPage title="Tasks" />} />
