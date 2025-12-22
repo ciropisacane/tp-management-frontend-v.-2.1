@@ -1,11 +1,28 @@
+// src/App.tsx
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { ToastProvider } from './contexts/ToastContext';
 import { useAuthStore } from './store/authStore';
+
+// Layout
+import MainLayout from './components/Layout/MainLayout';
+
+// Pages
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import ProjectList from './pages/Projects/ProjectList';
 import ProjectDetail from './pages/Projects/ProjectDetail';
-import MainLayout from './components/Layout/MainLayout';
 import Clients from './pages/Clients';
+
+// Placeholder Pages
+const PlaceholderPage = ({ title }: { title: string }) => (
+  <div className="flex items-center justify-center h-full">
+    <div className="text-center">
+      <h1 className="text-2xl font-bold text-gray-900 mb-2">{title}</h1>
+      <p className="text-gray-600">This page is under construction</p>
+    </div>
+  </div>
+);
 
 // Protected Route Component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -18,7 +35,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// Public Route Component (redirect se già autenticato)
+// Public Route Component (redirect if already authenticated)
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuthStore();
   
@@ -31,65 +48,53 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Public Routes */}
-        <Route 
-          path="/login" 
-          element={
-            <PublicRoute>
-              <Login />
-            </PublicRoute>
-          } 
-        />
-        
-        {/* Protected Routes con Layout */}
-        <Route 
-          element={
-            <ProtectedRoute>
-              <MainLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route path="/dashboard" element={<Dashboard />} />
-          
-          {/* Projects routes */}
-          <Route path="/projects" element={<ProjectList />} />
-          <Route path="/projects/:id" element={<ProjectDetail />} />
-          <Route path="/clients" element={<ProtectedRoute><Clients /></ProtectedRoute>} />
-          
-          {/* Placeholder routes (da implementare) */}
-          <Route path="/tasks" element={<PlaceholderPage title="Tasks" />} />
-          <Route path="/team" element={<PlaceholderPage title="Team" />} />
-          <Route path="/documents" element={<PlaceholderPage title="Documents" />} />
-          <Route path="/settings" element={<PlaceholderPage title="Settings" />} />
-        </Route>
-        
-        {/* Redirect root to dashboard */}
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        
-        {/* 404 */}
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
-      </Routes>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <ToastProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* Public Routes */}
+            <Route
+              path="/login"
+              element={
+                <PublicRoute>
+                  <Login />
+                </PublicRoute>
+              }
+            />
+
+            {/* Protected Routes */}
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <MainLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Navigate to="/dashboard" replace />} />
+              <Route path="dashboard" element={<Dashboard />} />
+              
+              {/* Projects */}
+              <Route path="projects" element={<ProjectList />} />
+              <Route path="projects/:id" element={<ProjectDetail />} />
+              
+              {/* Clients */}
+              <Route path="clients" element={<Clients />} />
+              
+              {/* Placeholder Pages */}
+              <Route path="tasks" element={<PlaceholderPage title="Tasks" />} />
+              <Route path="team" element={<PlaceholderPage title="Team" />} />
+              <Route path="documents" element={<PlaceholderPage title="Documents" />} />
+              <Route path="settings" element={<PlaceholderPage title="Settings" />} />
+            </Route>
+
+            {/* Catch all */}
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </ToastProvider>
+    </ErrorBoundary>
   );
 }
-
-// Temporary Placeholder Component
-const PlaceholderPage = ({ title }: { title: string }) => {
-  return (
-    <div className="flex flex-col items-center justify-center h-full">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">{title}</h1>
-        <p className="text-gray-600 text-lg">This page will be implemented in the next sprint</p>
-        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6 max-w-md">
-          <p className="text-sm text-blue-800">
-            <strong>Coming soon:</strong> Full {title.toLowerCase()} management with CRUD operations
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 export default App;
