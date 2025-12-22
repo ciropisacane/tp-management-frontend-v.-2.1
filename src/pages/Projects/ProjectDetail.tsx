@@ -17,6 +17,7 @@ import {
 import { useProject } from '../../hooks/useProjects';
 import EditProjectModal from '../../components/Projects/EditProjectModal';
 import DeleteProjectModal from '../../components/Projects/DeleteProjectModal';
+import TeamTab from '../../components/Projects/TeamTab'; // ← NUOVO IMPORT
 import { formatDate, formatCurrency, formatPercentage } from '../../utils/formatters';
 import {
   PROJECT_STATUS_LABELS,
@@ -220,7 +221,7 @@ const ProjectDetail = () => {
 
         <div className="p-6">
           {activeTab === 'overview' && <OverviewTab project={project} />}
-          {activeTab === 'team' && <TeamTab project={project} />}
+          {activeTab === 'team' && <TeamTab projectId={id!} />} {/* ← SOSTITUITO CON NUOVO COMPONENT */}
           {activeTab === 'tasks' && <TasksTab project={project} />}
           {activeTab === 'workflow' && <WorkflowTab project={project} />}
           {activeTab === 'documents' && <DocumentsTab project={project} />}
@@ -352,88 +353,6 @@ const OverviewTab = ({ project }: { project: any }) => {
   );
 };
 
-// Team Tab (Placeholder)
-const TeamTab = ({ project }: { project: any }) => {
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900">Team Members</h3>
-        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">
-          + Add Member
-        </button>
-      </div>
-
-      {project.team && project.team.length > 0 ? (
-        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Member</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Allocation</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Start Date</th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {project.team.map((member: any) => (
-                <tr key={member.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                        <span className="text-white text-sm font-semibold">
-                          {member.user?.firstName?.[0]}{member.user?.lastName?.[0]}
-                        </span>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">
-                          {member.user?.firstName} {member.user?.lastName}
-                        </p>
-                        <p className="text-xs text-gray-500">{member.user?.email}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="text-sm text-gray-900 capitalize">{member.roleInProject}</span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-20 bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-blue-600 h-2 rounded-full"
-                          style={{ width: `${member.allocationPercentage}%` }}
-                        />
-                      </div>
-                      <span className="text-sm text-gray-600">{member.allocationPercentage}%</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="text-sm text-gray-600">
-                      {new Date(member.startDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <button className="text-red-600 hover:text-red-700 text-sm">Remove</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-          <User className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-          <p className="text-gray-600 font-medium">No team members assigned</p>
-          <p className="text-sm text-gray-500 mt-1">Add team members to collaborate on this project</p>
-          <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">
-            Add First Member
-          </button>
-        </div>
-      )}
-    </div>
-  );
-};
-
 // Tasks Tab
 const TasksTab = ({ project }: { project: any }) => {
   const taskStats = {
@@ -477,7 +396,7 @@ const TasksTab = ({ project }: { project: any }) => {
       <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
         <CheckCircle className="w-12 h-12 text-gray-400 mx-auto mb-3" />
         <p className="text-gray-600 font-medium">Task list implementation</p>
-        <p className="text-sm text-gray-500 mt-1">Full task CRUD will be implemented in Sprint 4</p>
+        <p className="text-sm text-gray-500 mt-1">Full task CRUD will be implemented next</p>
         <p className="text-xs text-gray-400 mt-2">Stats shown are mock data for demonstration</p>
       </div>
     </div>
@@ -578,7 +497,7 @@ const WorkflowTab = ({ project }: { project: any }) => {
       {/* Note */}
       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
         <p className="text-sm text-yellow-800">
-          <strong>Note:</strong> This is a mock workflow visualization. Full workflow management with real data will be implemented when workflow API endpoints are ready.
+          <strong>Note:</strong> This is a mock workflow visualization. Full workflow management with real data will be implemented next.
         </p>
       </div>
     </div>
@@ -672,7 +591,7 @@ const DocumentsTab = ({ project }: { project: any }) => {
       {/* Note */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <p className="text-sm text-blue-800">
-          <strong>Note:</strong> Document management shows mock data. Full document upload/download with backend integration will be implemented when document API endpoints are ready.
+          <strong>Note:</strong> Document management shows mock data. Full document upload/download will be implemented next.
         </p>
       </div>
     </div>

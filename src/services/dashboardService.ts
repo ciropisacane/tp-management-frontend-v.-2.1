@@ -22,7 +22,7 @@ export interface DashboardStats {
     };
     status: string;
     priority: string;
-    deadline: string;
+    deadline: string | null;
     progress: number;
   }[];
   upcomingDeadlines: {
@@ -31,9 +31,16 @@ export interface DashboardStats {
     client: {
       name: string;
     };
-    deadline: string;
-    daysUntilDeadline: number;
+    deadline: string | null;
+    daysUntilDeadline: number | null;
   }[];
+}
+
+export interface UserActivity {
+  totalHours: number;
+  tasksCompleted: number;
+  documentsUploaded: number;
+  period: string;
 }
 
 class DashboardService {

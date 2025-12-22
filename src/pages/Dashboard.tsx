@@ -8,10 +8,12 @@ import {
   TrendingUp,
   AlertCircle,
   Loader2,
-  ArrowRight
+  ArrowRight,
+  Building2
 } from 'lucide-react';
-import projectService from '../services/projectService';
+import dashboardService from '../services/dashboardService';
 import { useAuthStore } from '../store/authStore';
+import { useToast } from '../contexts/ToastContext';
 import { formatDate, formatCurrency } from '../utils/formatters';
 import {
   PROJECT_STATUS_COLORS,
@@ -23,17 +25,10 @@ import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, Legend, Resp
 
 const Dashboard = () => {
   const { user } = useAuthStore();
+  const { error: showErrorToast } = useToast();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [stats, setStats] = useState({
-    activeProjects: 0,
-    pendingTasks: 0,
-    teamMembers: 0,
-    hoursThisMonth: 0
-  });
-  const [recentProjects, setRecentProjects] = useState<any[]>([]);
-  const [projectsByStatus, setProjectsByStatus] = useState<any[]>([]);
-  const [projectsByPriority, setProjectsByPriority] = useState<any[]>([]);
+  const [stats, setStats] = useState<any>(null);
 
   useEffect(() => {
     fetchDashboardData();
@@ -44,56 +39,14 @@ const Dashboard = () => {
     setError(null);
 
     try {
-      // Fetch all projects
-      const response = await projectService.getProjects({ limit: 100 });
-      const projects = response.data || [];
-
-      // Calculate stats
-      const activeProjects = projects.filter(p => 
-        !['COMPLETED', 'CANCELLED', 'ON_HOLD'].includes(p.status)
-      ).length;
-
-      setStats({
-        activeProjects,
-        pendingTasks: 24, // Mock for now
-        teamMembers: 8, // Mock for now
-        hoursThisMonth: 156 // Mock for now
-      });
-
-      // Recent projects (top 5)
-      setRecentProjects(projects.slice(0, 5));
-
-      // Group by status
-      const statusGroups = projects.reduce((acc: any, project: any) => {
-        const status = project.status;
-        if (!acc[status]) acc[status] = 0;
-        acc[status]++;
-        return acc;
-      }, {});
-
-      const statusData = Object.entries(statusGroups).map(([status, count]) => ({
-        name: PROJECT_STATUS_LABELS[status] || status,
-        value: count
-      }));
-      setProjectsByStatus(statusData);
-
-      // Group by priority
-      const priorityGroups = projects.reduce((acc: any, project: any) => {
-        const priority = project.priority;
-        if (!acc[priority]) acc[priority] = 0;
-        acc[priority]++;
-        return acc;
-      }, {});
-
-      const priorityData = Object.entries(priorityGroups).map(([priority, count]) => ({
-        name: PRIORITY_LABELS[priority as string] || priority,
-        value: count
-      }));
-      setProjectsByPriority(priorityData);
-
+      // Fetch real dashboard stats from backend
+      const data = await dashboardService.getStats();
+      setStats(data);
     } catch (err: any) {
       console.error('Error fetching dashboard data:', err);
-      setError('Failed to load dashboard data');
+      const errorMessage = err.response?.data?.error || 'Failed to load dashboard data';
+      setError(errorMessage);
+      showErrorToast('Failed to load dashboard', errorMessage);
     } finally {
       setLoading(false);
     }
@@ -112,14 +65,14 @@ const Dashboard = () => {
     );
   }
 
-  if (error) {
+  if (error || !stats) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-6">
         <div className="flex items-start space-x-3">
           <AlertCircle className="w-6 h-6 text-red-600 flex-shrink-0" />
           <div>
             <h3 className="text-lg font-semibold text-red-900">Error Loading Dashboard</h3>
-            <p className="text-red-700 mt-2">{error}</p>
+            <p className="text-red-700 mt-2">{error || 'Failed to load data'}</p>
             <button
               onClick={fetchDashboardData}
               className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
@@ -131,6 +84,17 @@ const Dashboard = () => {
       </div>
     );
   }
+
+  // Prepare chart data
+  const projectsByStatus = stats.projectsByStatus.map((item: any) => ({
+    name: PROJECT_STATUS_LABELS[item.status] || item.status.replace(/_/g, ' '),
+    value: item.count
+  }));
+
+  const projectsByPriority = stats.projectsByPriority.map((item: any) => ({
+    name: PRIORITY_LABELS[item.priority] || item.priority,
+    value: item.count
+  }));
 
   return (
     <div className="space-y-6">
@@ -145,8 +109,8 @@ const Dashboard = () => {
         <div className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Active Projects</p>
-              <p className="text-3xl font-bold mt-2 text-blue-600">{stats.activeProjects}</p>
+              <p className="text-sm font-medium text-gray-600">Total Projects</p>
+              <p className="text-3xl font-bold mt-2 text-blue-600">{stats.totalProjects}</p>
               <p className="text-xs text-gray-500 mt-2 flex items-center">
                 <TrendingUp className="w-3 h-3 mr-1 text-green-500" />
                 Real-time data
@@ -161,31 +125,15 @@ const Dashboard = () => {
         <div className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Pending Tasks</p>
-              <p className="text-3xl font-bold mt-2 text-yellow-600">{stats.pendingTasks}</p>
+              <p className="text-sm font-medium text-gray-600">Active Projects</p>
+              <p className="text-3xl font-bold mt-2 text-green-600">{stats.activeProjects}</p>
               <p className="text-xs text-gray-500 mt-2 flex items-center">
                 <AlertCircle className="w-3 h-3 mr-1 text-gray-400" />
-                5 overdue
-              </p>
-            </div>
-            <div className="p-3 bg-yellow-50 rounded-lg">
-              <CheckSquare className="w-6 h-6 text-yellow-600" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Team Members</p>
-              <p className="text-3xl font-bold mt-2 text-green-600">{stats.teamMembers}</p>
-              <p className="text-xs text-gray-500 mt-2 flex items-center">
-                <AlertCircle className="w-3 h-3 mr-1 text-gray-400" />
-                2 on leave
+                In progress
               </p>
             </div>
             <div className="p-3 bg-green-50 rounded-lg">
-              <Users className="w-6 h-6 text-green-600" />
+              <CheckSquare className="w-6 h-6 text-green-600" />
             </div>
           </div>
         </div>
@@ -193,15 +141,31 @@ const Dashboard = () => {
         <div className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Hours This Month</p>
-              <p className="text-3xl font-bold mt-2 text-purple-600">{stats.hoursThisMonth}</p>
+              <p className="text-sm font-medium text-gray-600">Completed</p>
+              <p className="text-3xl font-bold mt-2 text-purple-600">{stats.completedProjects}</p>
               <p className="text-xs text-gray-500 mt-2 flex items-center">
                 <TrendingUp className="w-3 h-3 mr-1 text-green-500" />
-                +12% vs last month
+                Delivered
               </p>
             </div>
             <div className="p-3 bg-purple-50 rounded-lg">
-              <Clock className="w-6 h-6 text-purple-600" />
+              <CheckSquare className="w-6 h-6 text-purple-600" />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">Active Clients</p>
+              <p className="text-3xl font-bold mt-2 text-orange-600">{stats.totalClients}</p>
+              <p className="text-xs text-gray-500 mt-2 flex items-center">
+                <Building2 className="w-3 h-3 mr-1 text-gray-400" />
+                Total clients
+              </p>
+            </div>
+            <div className="p-3 bg-orange-50 rounded-lg">
+              <Users className="w-6 h-6 text-orange-600" />
             </div>
           </div>
         </div>
@@ -215,7 +179,7 @@ const Dashboard = () => {
           {projectsByStatus.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={projectsByStatus}>
-                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                <XAxis dataKey="name" tick={{ fontSize: 12 }} angle={-45} textAnchor="end" height={100} />
                 <YAxis />
                 <Tooltip />
                 <Bar dataKey="value" fill="#3B82F6" />
@@ -240,11 +204,11 @@ const Dashboard = () => {
                   cy="50%"
                   labelLine={false}
                   label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
+                  outerRadius={100}
                   fill="#8884d8"
                   dataKey="value"
                 >
-                  {projectsByPriority.map((entry, index) => (
+                  {projectsByPriority.map((entry: any, index: number) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
@@ -259,153 +223,140 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Recent Projects Table */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900">Recent Projects</h2>
-            <p className="text-sm text-gray-600 mt-1">Projects you're currently working on</p>
-          </div>
-          <Link
-            to="/projects"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex items-center space-x-2"
-          >
-            <span>View All Projects</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-        
-        {recentProjects.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Project
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Client
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Priority
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Deadline
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Budget
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {recentProjects.map((project) => (
-                  <tr key={project.id} className="hover:bg-gray-50 cursor-pointer">
-                    <td className="px-6 py-4">
-                      <Link 
-                        to={`/projects/${project.id}`}
-                        className="text-sm font-medium text-blue-600 hover:text-blue-700"
-                      >
-                        {project.projectName}
-                      </Link>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-600">{project.client?.name || 'N/A'}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${PROJECT_STATUS_COLORS[project.status]}`}>
-                        {PROJECT_STATUS_LABELS[project.status] || project.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${PRIORITY_BG_COLORS[project.priority]}`}>
-                        {PRIORITY_LABELS[project.priority] || project.priority}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-600">{formatDate(project.deadline)}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-600">{formatCurrency(project.budget)}</div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div className="p-12 text-center">
-            <p className="text-gray-500">No projects found</p>
+      {/* Bottom Row - Recent Projects & Upcoming Deadlines */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent Projects */}
+        <div className="bg-white rounded-lg shadow">
+          <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">Recent Projects</h2>
+              <p className="text-sm text-gray-600 mt-1">Latest projects in the system</p>
+            </div>
             <Link
               to="/projects"
-              className="mt-4 inline-block text-blue-600 hover:text-blue-700"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex items-center space-x-2"
             >
-              Create your first project
+              <span>View All</span>
+              <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
-        )}
+          
+          {stats.recentProjects && stats.recentProjects.length > 0 ? (
+            <div className="p-4 space-y-3">
+              {stats.recentProjects.map((project: any) => (
+                <Link
+                  key={project.id}
+                  to={`/projects/${project.id}`}
+                  className="block p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900">{project.projectName}</p>
+                      <p className="text-sm text-gray-600">{project.client?.name}</p>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <div className="text-right">
+                        <p className="text-sm font-medium text-gray-900">{project.progress}%</p>
+                        <p className="text-xs text-gray-500">{PROJECT_STATUS_LABELS[project.status]}</p>
+                      </div>
+                      <div className="w-16 bg-gray-200 rounded-full h-2">
+                        <div
+                          className="bg-blue-600 h-2 rounded-full transition-all"
+                          style={{ width: `${project.progress}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="p-12 text-center">
+              <p className="text-gray-500">No projects found</p>
+              <Link
+                to="/projects"
+                className="mt-4 inline-block text-blue-600 hover:text-blue-700"
+              >
+                Create your first project
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Upcoming Deadlines */}
+        <div className="bg-white rounded-lg shadow">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h2 className="text-lg font-semibold text-gray-900">Upcoming Deadlines</h2>
+            <p className="text-sm text-gray-600 mt-1">Projects due in the next 30 days</p>
+          </div>
+
+          {stats.upcomingDeadlines && stats.upcomingDeadlines.length > 0 ? (
+            <div className="p-4 space-y-3">
+              {stats.upcomingDeadlines.map((project: any) => (
+                <Link
+                  key={project.id}
+                  to={`/projects/${project.id}`}
+                  className="block p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900">{project.projectName}</p>
+                      <p className="text-sm text-gray-600">{project.client?.name}</p>
+                    </div>
+                    <div className="text-right">
+                      {project.daysUntilDeadline !== null && (
+                        <>
+                          <p className={`text-sm font-medium ${
+                            project.daysUntilDeadline <= 7 ? 'text-red-600' : 'text-gray-900'
+                          }`}>
+                            {project.daysUntilDeadline} days
+                          </p>
+                          {project.deadline && (
+                            <p className="text-xs text-gray-500">
+                              {formatDate(project.deadline)}
+                            </p>
+                          )}
+                        </>
+                      )}
+                      {project.daysUntilDeadline !== null && project.daysUntilDeadline <= 7 && (
+                        <span className="inline-block mt-1 px-2 py-1 bg-red-100 text-red-800 text-xs font-semibold rounded">
+                          Urgent
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="p-12 text-center">
+              <Clock className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+              <p className="text-gray-500">No upcoming deadlines</p>
+              <p className="text-sm text-gray-400 mt-1">All projects are on track!</p>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Quick Actions & Activity */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-          <div className="space-y-3">
-            <Link
-              to="/projects"
-              className="w-full text-left px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium block"
-            >
-              + Create New Project
-            </Link>
-            <button className="w-full text-left px-4 py-2 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-sm font-medium">
-              + Add Task
-            </button>
-            <button className="w-full text-left px-4 py-2 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-sm font-medium">
-              + Upload Document
-            </button>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Upcoming Deadlines</h3>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-900">Local File - ABC Corp</p>
-                <p className="text-xs text-gray-500">Due in 3 days</p>
-              </div>
-              <span className="px-2 py-1 bg-red-100 text-red-800 text-xs font-semibold rounded">
-                Urgent
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-900">Master File - XYZ Ltd</p>
-                <p className="text-xs text-gray-500">Due in 5 days</p>
-              </div>
-              <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-semibold rounded">
-                Soon
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
-          <div className="space-y-3">
-            <div className="text-sm">
-              <p className="text-gray-900 font-medium">{user?.firstName} {user?.lastName}</p>
-              <p className="text-gray-500 text-xs">Logged in to dashboard</p>
-              <p className="text-gray-400 text-xs mt-1">Just now</p>
-            </div>
-            <div className="text-sm">
-              <p className="text-gray-900 font-medium">System</p>
-              <p className="text-gray-500 text-xs">Dashboard data refreshed</p>
-              <p className="text-gray-400 text-xs mt-1">1 minute ago</p>
-            </div>
-          </div>
+      {/* Quick Actions */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Link
+            to="/projects"
+            className="px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all text-center font-medium"
+          >
+            + Create New Project
+          </Link>
+          <Link
+            to="/clients"
+            className="px-6 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all text-center font-medium"
+          >
+            + Add New Client
+          </Link>
+          <button className="px-6 py-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all text-center font-medium">
+            + Upload Document
+          </button>
         </div>
       </div>
     </div>
