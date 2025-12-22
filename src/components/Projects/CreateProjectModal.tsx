@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { X, Building2, FileText, Calendar, DollarSign, AlertCircle } from 'lucide-react';
 import clientService, { type Client } from '../../services/clientService';
+import { formatDateForApi } from '../../utils/formatters';
 
 interface CreateProjectModalProps {
   isOpen: boolean;
@@ -110,8 +111,8 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
         deliverableType: formData.deliverableType,
         priority: formData.priority,
         riskLevel: formData.riskLevel,
-        startDate: formData.startDate || undefined,
-        deadline: formData.deadline || undefined,
+        startDate: formatDateForApi(formData.startDate) || undefined,
+        deadline: formatDateForApi(formData.deadline) || undefined,
         estimatedHours: formData.estimatedHours ? parseInt(formData.estimatedHours) : undefined,
         budget: formData.budget ? parseFloat(formData.budget) : undefined,
         description: formData.description.trim() || undefined

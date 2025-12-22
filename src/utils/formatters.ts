@@ -26,6 +26,16 @@ export const formatDateForInput = (date: string | Date | null | undefined): stri
   }
 };
 
+// Format date to ISO-8601 DateTime for API payloads
+export const formatDateForApi = (date: string | null | undefined): string | null => {
+  if (!date) return null;
+
+  const dateObj = new Date(date);
+  if (Number.isNaN(dateObj.getTime())) return null;
+
+  return dateObj.toISOString();
+};
+
 // Format datetime
 export const formatDateTime = (date: string | Date | null | undefined): string => {
   if (!date) return '-';
