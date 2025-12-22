@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X, Building2, FileText, Calendar, DollarSign, AlertCircle } from 'lucide-react';
-import clientService, { Client } from '../../services/clientService';
+import clientService, { type Client } from '../../services/clientService';
 
 interface CreateProjectModalProps {
   isOpen: boolean;

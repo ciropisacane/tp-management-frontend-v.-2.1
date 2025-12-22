@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Building2, Plus, Search, Edit2, Trash2, Mail, Phone, MapPin, AlertCircle } from 'lucide-react';
-import clientService, { Client, CreateClientDto } from '../services/clientService';
+import clientService, { type Client, type CreateClientDto } from '../services/clientService';
 
 export default function Clients() {
   const [clients, setClients] = useState<Client[]>([]);
