@@ -1,7 +1,7 @@
 // Frontend: src/components/Projects/TeamTab.tsx
 import { useState, useEffect } from 'react';
 import { Users, Plus, Edit2, Trash2, Mail, User } from 'lucide-react';
-import teamService, { TeamMember } from '../../services/teamService';
+import teamService, { type TeamMember } from '../../services/teamService';
 import { useToast } from '../../contexts/ToastContext';
 import { Loading, Skeleton } from '../Loading';
 import AddTeamMemberModal from './AddTeamMemberModal';

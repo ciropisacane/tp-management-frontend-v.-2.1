@@ -1,7 +1,7 @@
 // Frontend: src/components/Projects/AddTeamMemberModal.tsx
 import { useState, useEffect } from 'react';
 import { X, User, UserCircle, Percent, Calendar, AlertCircle } from 'lucide-react';
-import teamService, { AvailableUser } from '../../services/teamService';
+import teamService, { type AvailableUser } from '../../services/teamService';
 import { Spinner } from '../Loading';
 
 interface AddTeamMemberModalProps {

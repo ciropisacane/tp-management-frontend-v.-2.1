@@ -1,7 +1,7 @@
 // Frontend: src/components/Projects/EditTeamMemberModal.tsx
 import { useState } from 'react';
 import { X, UserCircle, Percent, AlertCircle } from 'lucide-react';
-import { TeamMember } from '../../services/teamService';
+import { type TeamMember } from '../../services/teamService';
 import { Spinner } from '../Loading';
 
 interface EditTeamMemberModalProps {
