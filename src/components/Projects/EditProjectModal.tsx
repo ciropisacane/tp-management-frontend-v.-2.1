@@ -7,7 +7,7 @@ import {
   PROJECT_STATUS_LABELS,
   PRIORITY_LABELS
 } from '../../utils/constants';
-import { formatDateForInput } from '../../utils/formatters';
+import { formatDateForApi, formatDateForInput } from '../../utils/formatters';
 
 interface EditProjectModalProps {
   isOpen: boolean;
@@ -102,8 +102,8 @@ const EditProjectModal = ({ isOpen, project, onClose, onSuccess }: EditProjectMo
         deliverableType: formData.deliverableType,
         status: formData.status,
         priority: formData.priority,
-        startDate: formData.startDate || null,
-        deadline: formData.deadline,
+        startDate: formatDateForApi(formData.startDate),
+        deadline: formatDateForApi(formData.deadline),
         budget: formData.budget ? parseFloat(formData.budget) : null,
         description: formData.description.trim() || null
       };
