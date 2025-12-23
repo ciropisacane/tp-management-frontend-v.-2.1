@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ToastProvider } from './contexts/ToastContext';
 import { useAuthStore } from './store/authStore';
+import { TaskList } from './pages/Tasks';
 
 // Layout
 import MainLayout from './components/Layout/MainLayout';
@@ -80,9 +81,11 @@ function App() {
               
               {/* Clients */}
               <Route path="clients" element={<Clients />} />
-              
+
+              {/* Tasks */}
+              <Route path="/tasks" element={<TaskList />} />
+
               {/* Placeholder Pages */}
-              <Route path="tasks" element={<PlaceholderPage title="Tasks" />} />
               <Route path="team" element={<PlaceholderPage title="Team" />} />
               <Route path="documents" element={<PlaceholderPage title="Documents" />} />
               <Route path="settings" element={<PlaceholderPage title="Settings" />} />
