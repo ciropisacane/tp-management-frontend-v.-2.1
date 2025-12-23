@@ -4,6 +4,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { ToastProvider } from './contexts/ToastContext';
 import { useAuthStore } from './store/authStore';
 import { TaskList } from './pages/Tasks';
+import { TeamList } from './pages/Team';
 
 // Layout
 import MainLayout from './components/Layout/MainLayout';
@@ -84,6 +85,9 @@ function App() {
 
               {/* Tasks */}
               <Route path="/tasks" element={<TaskList />} />
+
+              {/* Team */}
+              <Route path="/team" element={<TeamList />} />
 
               {/* Placeholder Pages */}
               <Route path="team" element={<PlaceholderPage title="Team" />} />

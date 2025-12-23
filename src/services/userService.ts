@@ -1,35 +1,67 @@
+// src/services/userService.ts
+
 import api from './api';
-import type { User } from '../types';
 
-export interface UserFilters {
-  active?: boolean;
-  role?: string;
-  search?: string;
-  page?: number;
-  limit?: number;
+export interface User {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+  department?: string;
+  hourlyRate?: number;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
-class UserService {
-  async getUsers(filters: UserFilters = {}): Promise<User[]> {
-    const response = await api.get('/users', { params: filters });
-    const payload = response.data as unknown;
-
-    if (Array.isArray(payload)) {
-      return payload as User[];
-    }
-
-    if (payload && typeof payload === 'object') {
-      const objectPayload = payload as { data?: User[]; users?: User[] };
-      if (Array.isArray(objectPayload.data)) {
-        return objectPayload.data;
-      }
-      if (Array.isArray(objectPayload.users)) {
-        return objectPayload.users;
-      }
-    }
-
-    return [];
-  }
+export interface UserListResponse {
+  success: boolean;
+  data: User[];
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
-export default new UserService();
+const userService = {
+  /**
+   * Get all users (for dropdowns, filters, etc.)
+   */
+  async getUsers(params?: {
+    active?: boolean;
+    role?: string;
+    search?: string;
+  }): Promise<User[]> {
+    // Note: This endpoint might not exist yet in your backend
+    // You may need to add it or adapt based on your actual API
+    try {
+      const response = await api.get<UserListResponse>('/users', { params });
+      return response.data.data;
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      // Fallback: return empty array or handle gracefully
+      return [];
+    }
+  },
+
+  /**
+   * Get current user info
+   */
+  async getCurrentUser(): Promise<User> {
+    const response = await api.get<{ success: boolean; data: { user: User } }>('/auth/me');
+    return response.data.data.user;
+  },
+
+  /**
+   * Get user by ID
+   */
+  async getUserById(id: string): Promise<User> {
+    const response = await api.get<{ success: boolean; data: User }>(`/users/${id}`);
+    return response.data.data;
+  },
+};
+
+export default userService;

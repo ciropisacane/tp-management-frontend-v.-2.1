@@ -7,9 +7,10 @@ import { TaskStats } from '../../components/Tasks/TaskStats';
 import { TaskFilters } from '../../components/Tasks/TaskFilters';
 import { TaskKanban } from '../../components/Tasks/TaskKanban';
 import { TaskTable } from '../../components/Tasks/TaskTable';
-import type { Task, TaskStatus } from '../../types/task.types';
+import { TaskModal } from '../../components/Tasks/TaskModal';
 import projectService from '../../services/projectService';
 import userService from '../../services/userService';
+import type { Task, TaskStatus, CreateTaskDto, UpdateTaskDto } from '../../types/task.types';
 
 type ViewMode = 'kanban' | 'table';
 
@@ -23,62 +24,58 @@ export const TaskList = () => {
     updateFilters,
     resetFilters,
     updateStatus,
+    createTask,
+    updateTask,
+    deleteTask,
     refresh,
   } = useTasks();
 
   const [viewMode, setViewMode] = useState<ViewMode>('kanban');
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // Options for filters/modal
+  const [projectsOptions, setProjectsOptions] = useState<Array<{ id: string; projectName: string }>>([]);
+  const [usersOptions, setUsersOptions] = useState<Array<{ id: string; firstName: string; lastName: string }>>([]);
+  const [isLoadingOptions, setIsLoadingOptions] = useState(true);
 
-  const [projectsOptions, setProjectsOptions] = useState<
-    Array<{ id: string; projectName: string }>
-  >([]);
-  const [usersOptions, setUsersOptions] = useState<
-    Array<{ id: string; firstName: string; lastName: string }>
-  >([]);
-
+  // Load projects and users for filters
   useEffect(() => {
-    let isMounted = true;
-
-    const loadFilterOptions = async () => {
+    const loadOptions = async () => {
+      setIsLoadingOptions(true);
       try {
         const [projectsResponse, users] = await Promise.all([
-          projectService.getProjects({ active: true, limit: 500 }),
-          userService.getUsers({ active: true, limit: 500 }),
+          projectService.getProjects({ page: 1, limit: 1000 }),
+          userService.getUsers({ active: true }),
         ]);
 
-        if (!isMounted) {
-          return;
-        }
-
         setProjectsOptions(
-          projectsResponse.data.map((project) => ({
-            id: project.id,
-            projectName: project.projectName,
+          projectsResponse.data.map((p) => ({
+            id: p.id,
+            projectName: p.projectName,
           }))
         );
+
         setUsersOptions(
-          users.map((user) => ({
-            id: user.id,
-            firstName: user.firstName,
-            lastName: user.lastName,
+          users.map((u) => ({
+            id: u.id,
+            firstName: u.firstName,
+            lastName: u.lastName,
           }))
         );
-      } catch (loadError) {
-        console.error('Failed to load task filter options:', loadError);
+      } catch (error) {
+        console.error('Error loading filter options:', error);
+      } finally {
+        setIsLoadingOptions(false);
       }
     };
 
-    void loadFilterOptions();
-
-    return () => {
-      isMounted = false;
-    };
+    loadOptions();
   }, []);
 
   const handleTaskClick = (task: Task) => {
     setSelectedTask(task);
-    // TODO: Open task modal/detail view
-    console.log('Task clicked:', task);
+    setIsModalOpen(true);
   };
 
   const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
@@ -90,8 +87,27 @@ export const TaskList = () => {
   };
 
   const handleCreateTask = () => {
-    // TODO: Open create task modal
-    console.log('Create task clicked');
+    setSelectedTask(null);
+    setIsModalOpen(true);
+  };
+
+  const handleSaveTask = async (data: CreateTaskDto | UpdateTaskDto) => {
+    if (selectedTask) {
+      // Update existing task
+      await updateTask(selectedTask.id, data as UpdateTaskDto);
+    } else {
+      // Create new task
+      await createTask(data as CreateTaskDto);
+    }
+  };
+
+  const handleDeleteTask = async (taskId: string) => {
+    await deleteTask(taskId);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedTask(null);
   };
 
   return (
@@ -155,7 +171,7 @@ export const TaskList = () => {
         </div>
 
         {/* Statistics */}
-        <TaskStats stats={stats} isLoading={isLoading} />
+        <TaskStats stats={stats} isLoading={isLoading && !stats} />
       </div>
 
       {/* Error Message */}
@@ -225,6 +241,17 @@ export const TaskList = () => {
           )}
         </div>
       </div>
+
+      {/* Task Modal */}
+      <TaskModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSave={handleSaveTask}
+        onDelete={selectedTask ? handleDeleteTask : undefined}
+        task={selectedTask}
+        projectsOptions={projectsOptions}
+        usersOptions={usersOptions}
+      />
     </div>
   );
 };
