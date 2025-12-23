@@ -12,6 +12,8 @@ export const PROJECT_STATUS = {
   CANCELLED: 'CANCELLED'
 } as const;
 
+export type ProjectStatus = (typeof PROJECT_STATUS)[keyof typeof PROJECT_STATUS];
+
 export const PROJECT_STATUS_LABELS: Record<string, string> = {
   PLANNING: 'Planning',
   DATA_COLLECTION: 'Data Collection',

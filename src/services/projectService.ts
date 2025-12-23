@@ -1,9 +1,10 @@
 import api from './api';
+import type { ProjectStatus } from '../utils/constants';
 import type { Project, PaginatedResponse } from '../types';
 
 export interface ProjectFilters {
   active?: boolean;
-  status?: string;
+  status?: ProjectStatus;
   priority?: string;
   search?: string;
   projectManagerId?: string;
@@ -15,7 +16,7 @@ export interface CreateProjectData {
   clientId: string;
   projectName: string;
   deliverableType: string;
-  status?: string;
+  status?: ProjectStatus;
   priority?: string;
   startDate?: string;
   deadline?: string;
@@ -70,7 +71,7 @@ class ProjectService {
   }
 
   // Change project status
-  async changeStatus(id: string, status: string): Promise<{ success: boolean; data: Project; message: string }> {
+  async changeStatus(id: string, status: ProjectStatus): Promise<{ success: boolean; data: Project; message: string }> {
     const response = await api.post(`/projects/${id}/status`, { status });
     return response.data;
   }

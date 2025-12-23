@@ -4,8 +4,10 @@ import projectService from '../../services/projectService';
 import type { Project } from '../../types';
 import {
   DELIVERABLE_TYPE_LABELS,
+  PROJECT_STATUS,
   PROJECT_STATUS_LABELS,
-  PRIORITY_LABELS
+  PRIORITY_LABELS,
+  type ProjectStatus
 } from '../../utils/constants';
 import { formatDateForApi, formatDateForInput } from '../../utils/formatters';
 
@@ -19,7 +21,7 @@ interface EditProjectModalProps {
 interface FormData {
   projectName: string;
   deliverableType: string;
-  status: string;
+  status: ProjectStatus;
   priority: string;
   startDate: string;
   deadline: string;
@@ -27,11 +29,14 @@ interface FormData {
   description: string;
 }
 
+const isValidStatus = (value: string): value is ProjectStatus =>
+  Object.values(PROJECT_STATUS).includes(value as ProjectStatus);
+
 const EditProjectModal = ({ isOpen, project, onClose, onSuccess }: EditProjectModalProps) => {
   const [formData, setFormData] = useState<FormData>({
     projectName: '',
     deliverableType: 'LOCAL_FILE',
-    status: 'PLANNING',
+    status: PROJECT_STATUS.PLANNING,
     priority: 'medium',
     startDate: '',
     deadline: '',
@@ -48,7 +53,7 @@ const EditProjectModal = ({ isOpen, project, onClose, onSuccess }: EditProjectMo
       setFormData({
         projectName: project.projectName || '',
         deliverableType: project.deliverableType || 'LOCAL_FILE',
-        status: project.status || 'PLANNING',
+        status: isValidStatus(project.status) ? project.status : PROJECT_STATUS.PLANNING,
         priority: project.priority || 'medium',
         startDate: formatDateForInput(project.startDate) || '',
         deadline: formatDateForInput(project.deadline) || '',
@@ -61,6 +66,18 @@ const EditProjectModal = ({ isOpen, project, onClose, onSuccess }: EditProjectMo
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+
+    if (name === 'status') {
+      if (!isValidStatus(value)) {
+        setError('Invalid status selected.');
+        return;
+      }
+
+      setFormData(prev => ({ ...prev, status: value }));
+      setError(null);
+      return;
+    }
+
     setFormData(prev => ({ ...prev, [name]: value }));
     setError(null);
   };
@@ -72,6 +89,11 @@ const EditProjectModal = ({ isOpen, project, onClose, onSuccess }: EditProjectMo
     }
     if (!formData.deadline) {
       setError('Deadline is required');
+      return false;
+    }
+
+    if (!isValidStatus(formData.status)) {
+      setError('Please select a valid project status before saving.');
       return false;
     }
     
@@ -199,8 +221,10 @@ const EditProjectModal = ({ isOpen, project, onClose, onSuccess }: EditProjectMo
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
                   required
                 >
-                  {Object.entries(PROJECT_STATUS_LABELS).map(([value, label]) => (
-                    <option key={value} value={value}>{label}</option>
+                  {Object.values(PROJECT_STATUS).map(statusValue => (
+                    <option key={statusValue} value={statusValue}>
+                      {PROJECT_STATUS_LABELS[statusValue]}
+                    </option>
                   ))}
                 </select>
               </div>
