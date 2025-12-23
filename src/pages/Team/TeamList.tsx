@@ -13,7 +13,8 @@ import {
   RefreshCw,
   UserPlus
 } from 'lucide-react';
-import userService, { User } from '../../services/userService';
+import userService from '../../services/userService';
+import type { User } from '../../services/userService';
 
 const roleColors: Record<string, { bg: string; text: string; label: string }> = {
   admin: { bg: 'bg-purple-100', text: 'text-purple-700', label: 'Admin' },
