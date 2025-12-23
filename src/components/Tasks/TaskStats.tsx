@@ -30,46 +30,58 @@ import {
     }
   
     if (!stats) return null;
-  
+
+    const safeStats = {
+      total: stats.total ?? 0,
+      overdue: stats.overdue ?? 0,
+      byStatus: {
+        todo: stats.byStatus?.todo ?? 0,
+        in_progress: stats.byStatus?.in_progress ?? 0,
+        review: stats.byStatus?.review ?? 0,
+        completed: stats.byStatus?.completed ?? 0,
+        blocked: stats.byStatus?.blocked ?? 0,
+      },
+    };
+
     const statCards = [
       {
         label: 'Total Tasks',
-        value: stats.total,
+        value: safeStats.total,
         icon: TrendingUp,
         color: 'text-gray-600',
         bg: 'bg-gray-50',
       },
       {
         label: 'To Do',
-        value: stats.byStatus.todo,
+        value: safeStats.byStatus.todo,
         icon: Clock,
         color: 'text-blue-600',
         bg: 'bg-blue-50',
       },
       {
         label: 'In Progress',
-        value: stats.byStatus.in_progress,
+        value: safeStats.byStatus.in_progress,
         icon: PlayCircle,
         color: 'text-yellow-600',
         bg: 'bg-yellow-50',
       },
       {
         label: 'In Review',
-        value: stats.byStatus.review,
+        value: safeStats.byStatus.review,
         icon: AlertCircle,
         color: 'text-purple-600',
         bg: 'bg-purple-50',
       },
       {
         label: 'Completed',
-        value: stats.byStatus.completed,
+        value: safeStats.byStatus.completed,
         icon: CheckCircle2,
         color: 'text-green-600',
         bg: 'bg-green-50',
       },
       {
         label: 'Overdue',
-        value: stats.overdue,
+        value: safeStats.overdue,
         icon: XCircle,
         color: 'text-red-600',
         bg: 'bg-red-50',
