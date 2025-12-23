@@ -2,6 +2,7 @@ import api from './api';
 import type { Project, PaginatedResponse } from '../types';
 
 export interface ProjectFilters {
+  active?: boolean;
   status?: string;
   priority?: string;
   search?: string;
@@ -32,6 +33,7 @@ class ProjectService {
   async getProjects(filters: ProjectFilters = {}): Promise<PaginatedResponse<Project>> {
     const params = new URLSearchParams();
     
+    if (filters.active !== undefined) params.append('active', String(filters.active));
     if (filters.status) params.append('status', filters.status);
     if (filters.priority) params.append('priority', filters.priority);
     if (filters.search) params.append('search', filters.search);
