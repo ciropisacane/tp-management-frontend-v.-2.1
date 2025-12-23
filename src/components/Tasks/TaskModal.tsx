@@ -99,6 +99,12 @@ export const TaskModal = ({
     }
   }, [isOpen, projectId]);
 
+  useEffect(() => {
+    if (!task && usersOptions.length > 0 && !formData.assignedToId) {
+      setFormData((prev) => ({ ...prev, assignedToId: usersOptions[0].id }));
+    }
+  }, [task, usersOptions, formData.assignedToId]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -106,6 +112,11 @@ export const TaskModal = ({
     // Validation
     if (!formData.title.trim()) {
       setError('Task title is required');
+      return;
+    }
+
+    if (!task && !formData.assignedToId) {
+      setError('Assignee is required for new tasks');
       return;
     }
 
@@ -118,7 +129,7 @@ export const TaskModal = ({
         title: formData.title.trim(),
         description: formData.description?.trim() || undefined,
         projectId: formData.projectId || undefined,
-        assignedToId: formData.assignedToId || undefined,
+        assignedToId: formData.assignedToId,
         dueDate: formData.dueDate || undefined,
         estimatedHours: formData.estimatedHours || undefined,
         tags: formData.tags.length > 0 ? formData.tags : undefined,
