@@ -8,6 +8,8 @@ import { TaskFilters } from '../../components/Tasks/TaskFilters';
 import { TaskKanban } from '../../components/Tasks/TaskKanban';
 import { TaskTable } from '../../components/Tasks/TaskTable';
 import type { Task, TaskStatus } from '../../types/task.types';
+import projectService from '../../services/projectService';
+import userService from '../../services/userService';
 
 type ViewMode = 'kanban' | 'table';
 
@@ -27,9 +29,51 @@ export const TaskList = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('kanban');
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
-  // TODO: Load projects and users for filters
-  const projectsOptions: Array<{ id: string; projectName: string }> = [];
-  const usersOptions: Array<{ id: string; firstName: string; lastName: string }> = [];
+  const [projectsOptions, setProjectsOptions] = useState<
+    Array<{ id: string; projectName: string }>
+  >([]);
+  const [usersOptions, setUsersOptions] = useState<
+    Array<{ id: string; firstName: string; lastName: string }>
+  >([]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadFilterOptions = async () => {
+      try {
+        const [projectsResponse, users] = await Promise.all([
+          projectService.getProjects({ active: true, limit: 500 }),
+          userService.getUsers({ active: true, limit: 500 }),
+        ]);
+
+        if (!isMounted) {
+          return;
+        }
+
+        setProjectsOptions(
+          projectsResponse.data.map((project) => ({
+            id: project.id,
+            projectName: project.projectName,
+          }))
+        );
+        setUsersOptions(
+          users.map((user) => ({
+            id: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+          }))
+        );
+      } catch (loadError) {
+        console.error('Failed to load task filter options:', loadError);
+      }
+    };
+
+    void loadFilterOptions();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleTaskClick = (task: Task) => {
     setSelectedTask(task);
