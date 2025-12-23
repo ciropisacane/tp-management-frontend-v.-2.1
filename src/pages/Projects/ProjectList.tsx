@@ -276,7 +276,7 @@ const ProjectList = () => {
                     Group
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Type
+                    Project
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
@@ -313,11 +313,11 @@ const ProjectList = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-600">
-                        {DELIVERABLE_TYPE_LABELS[project.deliverableType] || project.deliverableType}
-                      </div>
-                    </td>
+                  <td className="px-6 py-4">
+                    <div className="text-sm text-gray-600">
+                      {truncateText(project.projectName, 40)}
+                    </div>
+                  </td>
                     <td className="px-6 py-4">
                       <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${PROJECT_STATUS_COLORS[project.status]}`}>
                         {PROJECT_STATUS_LABELS[project.status] || project.status}
