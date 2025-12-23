@@ -18,6 +18,7 @@ import { useProject } from '../../hooks/useProjects';
 import EditProjectModal from '../../components/Projects/EditProjectModal';
 import DeleteProjectModal from '../../components/Projects/DeleteProjectModal';
 import TeamTab from '../../components/Projects/TeamTab';
+import { ProjectWorkflowTab } from '../../components/Projects/ProjectWorkflowTab';
 import { ProjectTasksTab } from '../../components/Projects/ProjectTasksTab';
 import { formatDate, formatCurrency, formatPercentage } from '../../utils/formatters';
 import {
@@ -229,7 +230,12 @@ const ProjectDetail = () => {
               projectName={project.projectName}
             />
           )}
-          {activeTab === 'workflow' && <WorkflowTab project={project} />}
+          {activeTab === 'workflow' && (
+            <ProjectWorkflowTab
+             projectId={project.id} 
+             projectName={project.projectName}
+            />
+          )}
           {activeTab === 'documents' && <DocumentsTab project={project} />}
         </div>
       </div>
