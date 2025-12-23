@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Building2, FileText, Calendar, DollarSign, AlertCircle } from 'lucide-react';
+import { X, Building2, FileText, Calendar, AlertCircle } from 'lucide-react';
 import clientService, { type Client } from '../../services/clientService';
 import { formatDateForApi } from '../../utils/formatters';
 import { CurrencyInput } from '../Common/CurrencyInput';
@@ -42,13 +42,26 @@ const riskLevels = [
   { value: 'high', label: 'High' }
 ];
 
+interface ProjectFormData {
+  clientId: string;
+  projectName: string;
+  deliverableType: string;
+  priority: string;
+  riskLevel: string;
+  startDate: string;
+  deadline: string;
+  estimatedHours: number | null;
+  budget: number | null;
+  description: string;
+}
+
 export default function CreateProjectModal({ isOpen, onClose, onSubmit }: CreateProjectModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [clients, setClients] = useState<Client[]>([]);
   const [loadingClients, setLoadingClients] = useState(true);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ProjectFormData>({
     clientId: '',
     projectName: '',
     deliverableType: 'LOCAL_FILE',
@@ -56,8 +69,8 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
     riskLevel: 'medium',
     startDate: '',
     deadline: '',
-    estimatedHours: '',
-    budget: '',
+    estimatedHours: null,
+    budget: null,
     description: ''
   });
 
@@ -114,8 +127,8 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
         riskLevel: formData.riskLevel,
         startDate: formatDateForApi(formData.startDate) || undefined,
         deadline: formatDateForApi(formData.deadline) || undefined,
-        estimatedHours: formData.estimatedHours ? parseInt(formData.estimatedHours) : undefined,
-        budget: formData.budget ? parseFloat(formData.budget) : undefined,
+        estimatedHours: formData.estimatedHours ?? undefined,
+        budget: formData.budget ?? undefined,
         description: formData.description.trim() || undefined
       };
 
@@ -138,8 +151,8 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
       riskLevel: 'medium',
       startDate: '',
       deadline: '',
-      estimatedHours: '',
-      budget: '',
+      estimatedHours: null,
+      budget: null,
       description: ''
     });
     setError(null);
@@ -340,33 +353,31 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Budget
-                </label>
-                <input
-                  type="number"
-                  value={formData.budget || ''}
-                  onChange={(e) => setFormData({ ...formData, budget: parseFloat(e.target.value) })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  placeholder="Enter budget"
-                />
-              </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Budget (€)
+                Budget hours
               </label>
-              <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                  type="number"
-                  value={formData.budget}
-                  onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g., 50000"
-                  min="0"
-                  step="0.01"
-                  disabled={isLoading}
-                />
-              </div>
+              <input
+                type="number"
+                value={formData.estimatedHours ?? ''}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setFormData({ ...formData, estimatedHours: value ? parseFloat(value) : null });
+                }}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                placeholder="Enter estimated hours"
+                min="0"
+                step="0.1"
+                disabled={isLoading}
+              />
+            </div>
+            <div>
+              <CurrencyInput
+                label="Budget (€)"
+                value={formData.budget}
+                onChange={(value) => setFormData({ ...formData, budget: value })}
+                placeholder="e.g., 50,000"
+                currency="€"
+                disabled={isLoading}
+              />
             </div>
           </div>
 
