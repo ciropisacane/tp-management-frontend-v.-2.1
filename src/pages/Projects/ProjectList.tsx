@@ -270,10 +270,10 @@ const ProjectList = () => {
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Project Name
+                    Client
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Client
+                    Group
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Type
@@ -299,6 +299,11 @@ const ProjectList = () => {
                 {projects.map((project) => (
                   <tr key={project.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4">
+                      <div className="text-sm text-gray-900">
+                        {project.client?.name || '-'}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
                       <div>
                         <div className="text-sm font-medium text-gray-900">
                           {truncateText(project.projectName, 40)}
@@ -306,11 +311,6 @@ const ProjectList = () => {
                         <div className="text-xs text-gray-500 mt-1">
                           PM: {project.projectManager?.firstName} {project.projectManager?.lastName}
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900">
-                        {project.client?.name || '-'}
                       </div>
                     </td>
                     <td className="px-6 py-4">
