@@ -1,3 +1,5 @@
+import type { ProjectStatus } from '../utils/constants';
+
 // User Types
 export interface User {
   id: string;
@@ -45,7 +47,7 @@ export interface Project {
   id: string;
   projectName: string;
   deliverableType: string;
-  status: string;
+  status: ProjectStatus;
   priority: string;
   startDate: string | null;
   deadline: string | null;
@@ -216,7 +218,7 @@ export interface BaseFilters {
 }
 
 export interface ProjectFilters extends BaseFilters {
-  status?: string;
+  status?: ProjectStatus;
   priority?: string;
   projectManagerId?: string;
   clientId?: string;
