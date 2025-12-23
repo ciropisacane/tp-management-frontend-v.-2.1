@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { X, Building2, FileText, Calendar, DollarSign, AlertCircle } from 'lucide-react';
 import clientService, { type Client } from '../../services/clientService';
 import { formatDateForApi } from '../../utils/formatters';
+import { CurrencyInput } from '../Common/CurrencyInput';
 
 interface CreateProjectModalProps {
   isOpen: boolean;
@@ -337,20 +338,13 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
 
           {/* Budget & Hours Row */}
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Estimated Hours
-              </label>
-              <input
-                type="number"
-                value={formData.estimatedHours}
-                onChange={(e) => setFormData({ ...formData, estimatedHours: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="e.g., 120"
-                min="0"
-                disabled={isLoading}
-              />
-            </div>
+            <CurrencyInput
+              value={formData.budget}
+              onChange={(value) => setFormData({ ...formData, budget: value })}
+              label="Budget"
+              placeholder="0"
+              currency="$"
+            />
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
