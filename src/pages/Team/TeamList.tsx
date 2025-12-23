@@ -1,10 +1,10 @@
 // src/pages/Team/TeamList.tsx
 
 import { useState, useEffect } from 'react';
-import { 
-  Users, 
-  Search, 
-  Filter, 
+import {
+  Users,
+  Search,
+  Filter,
   Mail, 
   Phone,
   Calendar,
@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import userService from '../../services/userService';
 import type { User } from '../../services/userService';
+import { CreateUserModal } from '../../components/Team/CreateUserModal';
 
 const roleColors: Record<string, { bg: string; text: string; label: string }> = {
   admin: { bg: 'bg-purple-100', text: 'text-purple-700', label: 'Admin' },
@@ -30,6 +31,7 @@ export const TeamList = () => {
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -130,7 +132,7 @@ export const TeamList = () => {
             
             <button
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700"
-              onClick={() => alert('Add team member feature coming soon!')}
+              onClick={() => setIsCreateModalOpen(true)}
             >
               <UserPlus className="h-5 w-5" />
               Add Member
@@ -336,6 +338,12 @@ export const TeamList = () => {
           })}
         </div>
       )}
+
+      <CreateUserModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onUserCreated={loadUsers}
+      />
     </div>
   );
 };

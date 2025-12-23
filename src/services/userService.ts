@@ -26,6 +26,16 @@ export interface UserListResponse {
   };
 }
 
+export interface CreateUserPayload {
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+  department?: string;
+  hourlyRate?: number;
+  active?: boolean;
+}
+
 const userService = {
   /**
    * Get all users (for dropdowns, filters, etc.)
@@ -60,6 +70,14 @@ const userService = {
    */
   async getUserById(id: string): Promise<User> {
     const response = await api.get<{ success: boolean; data: User }>(`/users/${id}`);
+    return response.data.data;
+  },
+
+  /**
+   * Create a new user
+   */
+  async createUser(payload: CreateUserPayload): Promise<User> {
+    const response = await api.post<{ success: boolean; data: User }>('/users', payload);
     return response.data.data;
   },
 };
