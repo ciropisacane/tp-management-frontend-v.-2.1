@@ -17,7 +17,8 @@ import {
 import { useProject } from '../../hooks/useProjects';
 import EditProjectModal from '../../components/Projects/EditProjectModal';
 import DeleteProjectModal from '../../components/Projects/DeleteProjectModal';
-import TeamTab from '../../components/Projects/TeamTab'; // ← NUOVO IMPORT
+import TeamTab from '../../components/Projects/TeamTab';
+import { ProjectTasksTab } from '../../components/Projects/ProjectTasksTab';
 import { formatDate, formatCurrency, formatPercentage } from '../../utils/formatters';
 import {
   PROJECT_STATUS_LABELS,
@@ -222,7 +223,12 @@ const ProjectDetail = () => {
         <div className="p-6">
           {activeTab === 'overview' && <OverviewTab project={project} />}
           {activeTab === 'team' && <TeamTab projectId={id!} />} {/* ← SOSTITUITO CON NUOVO COMPONENT */}
-          {activeTab === 'tasks' && <TasksTab project={project} />}
+          {activeTab === 'tasks' && (
+            <ProjectTasksTab
+              projectId={project.id}
+              projectName={project.projectName}
+            />
+          )}
           {activeTab === 'workflow' && <WorkflowTab project={project} />}
           {activeTab === 'documents' && <DocumentsTab project={project} />}
         </div>
