@@ -338,14 +338,18 @@ export default function CreateProjectModal({ isOpen, onClose, onSubmit }: Create
 
           {/* Budget & Hours Row */}
           <div className="grid grid-cols-2 gap-4">
-            <CurrencyInput
-              value={formData.budget}
-              onChange={(value) => setFormData({ ...formData, budget: value })}
-              label="Budget"
-              placeholder="0"
-              currency="$"
-            />
-
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Budget
+                </label>
+                <input
+                  type="number"
+                  value={formData.budget || ''}
+                  onChange={(e) => setFormData({ ...formData, budget: parseFloat(e.target.value) })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  placeholder="Enter budget"
+                />
+              </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Budget (€)
