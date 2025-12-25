@@ -1,21 +1,20 @@
 // src/pages/Team/TeamList.tsx
 
 import { useState, useEffect } from 'react';
-import {
-  Users,
-  Search,
-  Filter,
+import { 
+  Users, 
+  Search, 
+  X,
   Mail, 
-  Phone,
   Calendar,
   Shield,
   Clock,
   RefreshCw,
   UserPlus
 } from 'lucide-react';
-import userService from '../../services/userService';
-import type { User } from '../../services/userService';
-import { CreateUserModal } from '../../components/Team/CreateUserModal';
+import userService, { User } from '../../services/userService';
+import { AddMemberModal } from '../../components/Team/CreateUserModal';
+import api from '../../services/api'; // 🆕 Import API client
 
 const roleColors: Record<string, { bg: string; text: string; label: string }> = {
   admin: { bg: 'bg-purple-100', text: 'text-purple-700', label: 'Admin' },
@@ -26,12 +25,22 @@ const roleColors: Record<string, { bg: string; text: string; label: string }> = 
   support: { bg: 'bg-gray-100', text: 'text-gray-700', label: 'Support' },
 };
 
+interface CreateMemberDto {
+  email: string;
+  firstName: string;
+  lastName: string;
+  password: string;
+  role: string;
+  department?: string;
+  hourlyRate?: number;
+}
+
 export const TeamList = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -86,6 +95,29 @@ export const TeamList = () => {
     }
   };
 
+  const handleAddMember = async (data: CreateMemberDto) => {
+    try {
+      // 🆕 FIXED: Use API client with proper error handling
+      const response = await api.post('/auth/register', data);
+      
+      if (response.data.success) {
+        // Reload users list
+        await loadUsers();
+        setIsModalOpen(false);
+      } else {
+        throw new Error(response.data.message || 'Failed to add team member');
+      }
+    } catch (error: any) {
+      // Better error message
+      const errorMessage = 
+        error.response?.data?.message || 
+        error.message || 
+        'Failed to add team member';
+      
+      throw new Error(errorMessage);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
@@ -131,8 +163,8 @@ export const TeamList = () => {
             </button>
             
             <button
+              onClick={() => setIsModalOpen(true)}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700"
-              onClick={() => setIsCreateModalOpen(true)}
             >
               <UserPlus className="h-5 w-5" />
               Add Member
@@ -188,8 +220,18 @@ export const TeamList = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by name or email..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
+              {/* Clear button */}
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  type="button"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
             </div>
           </div>
 
@@ -339,10 +381,11 @@ export const TeamList = () => {
         </div>
       )}
 
-      <CreateUserModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onUserCreated={loadUsers}
+      {/* Add Member Modal */}
+      <AddMemberModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleAddMember}
       />
     </div>
   );
