@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import userService from '../../services/userService';
 import type { User } from '../../services/userService';
-import { AddMemberModal } from '../../components/Team/CreateUserModal';
+import { CreateUserModal } from '../../components/Team/CreateUserModal';
 import api from '../../services/api'; // 🆕 Import API client
 
 const roleColors: Record<string, { bg: string; text: string; label: string }> = {
