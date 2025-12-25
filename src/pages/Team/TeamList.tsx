@@ -383,7 +383,7 @@ export const TeamList = () => {
       )}
 
       {/* Add Member Modal */}
-      <AddMemberModal
+      <CreateUserModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSave={handleAddMember}
