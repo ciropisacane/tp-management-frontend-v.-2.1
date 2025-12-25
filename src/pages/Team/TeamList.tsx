@@ -1,18 +1,19 @@
 // src/pages/Team/TeamList.tsx
 
 import { useState, useEffect } from 'react';
-import { 
-  Users, 
-  Search, 
+import {
+  Users,
+  Search,
   X,
-  Mail, 
+  Mail,
   Calendar,
   Shield,
   Clock,
   RefreshCw,
   UserPlus
 } from 'lucide-react';
-import userService, { User } from '../../services/userService';
+import userService from '../../services/userService';
+import type { User } from '../../services/userService';
 import { AddMemberModal } from '../../components/Team/CreateUserModal';
 import api from '../../services/api'; // 🆕 Import API client
 
