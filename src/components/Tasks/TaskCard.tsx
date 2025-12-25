@@ -156,7 +156,10 @@ import {
             <div className="flex items-center gap-1">
               <User className="h-3 w-3" />
               <span className="truncate max-w-[100px]">
-                {task.assignedTo.firstName} {task.assignedTo.lastName.charAt(0)}.
+                {task.assignedTo.firstName}
+                {task.assignedTo.lastName?.charAt(0)
+                  ? ` ${task.assignedTo.lastName.charAt(0)}.`
+                  : ''}
               </span>
             </div>
           )}
