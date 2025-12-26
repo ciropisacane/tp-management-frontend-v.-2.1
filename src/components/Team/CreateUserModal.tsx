@@ -74,7 +74,20 @@ export const CreateUserModal = ({ isOpen, onClose, onUserCreated }: CreateUserMo
       await onUserCreated();
       onClose();
     } catch (err: any) {
-      setError(err?.message || 'Failed to create user');
+      const responseData = err.response?.data;
+      let errorMessage = 'Failed to create user';
+
+      if (responseData) {
+        if (responseData.errors && Array.isArray(responseData.errors) && responseData.errors.length > 0) {
+          errorMessage = responseData.errors.join(', ');
+        } else if (responseData.message) {
+          errorMessage = responseData.message;
+        }
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -217,10 +230,11 @@ export const CreateUserModal = ({ isOpen, onClose, onUserCreated }: CreateUserMo
                 <input
                   type="text"
                   required
+                  minLength={8}
                   value={formData.password || ''}
                   onChange={(e) => handleChange('password', e.target.value)}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter initial password"
+                  placeholder="Enter initial password (min 8 chars)"
                   disabled={isSubmitting}
                 />
               </div>
