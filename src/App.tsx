@@ -15,6 +15,7 @@ import Dashboard from './pages/Dashboard';
 import ProjectList from './pages/Projects/ProjectList';
 import ProjectDetail from './pages/Projects/ProjectDetail';
 import Clients from './pages/Clients';
+import ConnectionTest from './pages/ConnectionTest';
 
 // Placeholder Pages
 const PlaceholderPage = ({ title }: { title: string }) => (
@@ -29,22 +30,22 @@ const PlaceholderPage = ({ title }: { title: string }) => (
 // Protected Route Component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuthStore();
-  
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
-  
+
   return <>{children}</>;
 };
 
 // Public Route Component (redirect if already authenticated)
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuthStore();
-  
+
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }
-  
+
   return <>{children}</>;
 };
 
@@ -54,7 +55,9 @@ function App() {
       <ToastProvider>
         <BrowserRouter>
           <Routes>
+
             {/* Public Routes */}
+            <Route path="/test-connection" element={<ConnectionTest />} />
             <Route
               path="/login"
               element={
@@ -75,11 +78,11 @@ function App() {
             >
               <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="dashboard" element={<Dashboard />} />
-              
+
               {/* Projects */}
               <Route path="projects" element={<ProjectList />} />
               <Route path="projects/:id" element={<ProjectDetail />} />
-              
+
               {/* Clients */}
               <Route path="clients" element={<Clients />} />
 
