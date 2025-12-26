@@ -15,21 +15,6 @@ import {
 import userService from '../../services/userService';
 import type { User } from '../../services/userService';
 import { CreateUserModal } from '../../components/Team/CreateUserModal';
-
-
-// ...
-
-// ...
-      <CreateUserModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onUserCreated={() => handleAddMember({...} as any)} // Wait, handleAddMember expects data arg. onUserCreated is () => void.
-// The modal calls userService internally! 
-// Let's re-read CreateUserModal.tsx logic.
-// It calls userService.createUser ITSELF.
-// So TeamList.tsx SHOULD NOT implement handleAddMember logic again.
-// It just needs to reload users.
-
 const roleColors: Record<string, { bg: string; text: string; label: string }> = {
   admin: { bg: 'bg-purple-100', text: 'text-purple-700', label: 'Admin' },
   partner: { bg: 'bg-red-100', text: 'text-red-700', label: 'Partner' },
