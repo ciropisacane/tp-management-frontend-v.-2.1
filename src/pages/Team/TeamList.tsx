@@ -15,7 +15,7 @@ import {
 import userService from '../../services/userService';
 import type { User } from '../../services/userService';
 import { CreateUserModal } from '../../components/Team/CreateUserModal';
-import { CreateUserModal } from '../../components/Team/CreateUserModal';
+
 
 // ...
 
@@ -39,15 +39,7 @@ const roleColors: Record<string, { bg: string; text: string; label: string }> = 
   support: { bg: 'bg-gray-100', text: 'text-gray-700', label: 'Support' },
 };
 
-interface CreateMemberDto {
-  email: string;
-  firstName: string;
-  lastName: string;
-  password: string;
-  role: string;
-  department?: string;
-  hourlyRate?: number;
-}
+
 
 export const TeamList = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -106,29 +98,6 @@ export const TeamList = () => {
       setError(err.message || 'Failed to load team members');
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleAddMember = async (data: CreateMemberDto) => {
-    try {
-      if (!data.password) {
-        throw new Error('Password is required');
-      }
-      await userService.createUser({
-        ...data,
-        password: data.password
-      });
-      // Reload users list
-      await loadUsers();
-      setIsModalOpen(false);
-    } catch (error: any) {
-      // Better error message
-      const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        'Failed to add team member';
-
-      throw new Error(errorMessage);
     }
   };
 
@@ -398,7 +367,7 @@ export const TeamList = () => {
       <CreateUserModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onSave={handleAddMember}
+        onUserCreated={loadUsers}
       />
     </div>
   );
