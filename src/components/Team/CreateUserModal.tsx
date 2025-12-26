@@ -26,7 +26,8 @@ export const CreateUserModal = ({ isOpen, onClose, onUserCreated }: CreateUserMo
     role: 'consultant',
     department: '',
     hourlyRate: undefined,
-    active: true
+    active: true,
+    password: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +41,8 @@ export const CreateUserModal = ({ isOpen, onClose, onUserCreated }: CreateUserMo
         role: 'consultant',
         department: '',
         hourlyRate: undefined,
-        active: true
+        active: true,
+        password: ''
       });
       setError(null);
       setIsSubmitting(false);
@@ -201,6 +203,24 @@ export const CreateUserModal = ({ isOpen, onClose, onUserCreated }: CreateUserMo
                   onChange={(e) => handleChange('hourlyRate', e.target.value ? Number(e.target.value) : undefined)}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="80"
+                  disabled={isSubmitting}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Password (Required for new users)</label>
+              <div className="relative">
+                <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <input
+                  type="text"
+                  required
+                  value={formData.password || ''}
+                  onChange={(e) => handleChange('password', e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter initial password"
                   disabled={isSubmitting}
                 />
               </div>

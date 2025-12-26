@@ -15,7 +15,20 @@ import {
 import userService from '../../services/userService';
 import type { User } from '../../services/userService';
 import { CreateUserModal } from '../../components/Team/CreateUserModal';
-import api from '../../services/api'; // 🆕 Import API client
+import { CreateUserModal } from '../../components/Team/CreateUserModal';
+
+// ...
+
+// ...
+      <CreateUserModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onUserCreated={() => handleAddMember({...} as any)} // Wait, handleAddMember expects data arg. onUserCreated is () => void.
+// The modal calls userService internally! 
+// Let's re-read CreateUserModal.tsx logic.
+// It calls userService.createUser ITSELF.
+// So TeamList.tsx SHOULD NOT implement handleAddMember logic again.
+// It just needs to reload users.
 
 const roleColors: Record<string, { bg: string; text: string; label: string }> = {
   admin: { bg: 'bg-purple-100', text: 'text-purple-700', label: 'Admin' },
@@ -42,7 +55,7 @@ export const TeamList = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
+
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
@@ -75,7 +88,7 @@ export const TeamList = () => {
 
     // Status filter
     if (statusFilter !== 'all') {
-      filtered = filtered.filter((user) => 
+      filtered = filtered.filter((user) =>
         statusFilter === 'active' ? user.active : !user.active
       );
     }
@@ -98,23 +111,23 @@ export const TeamList = () => {
 
   const handleAddMember = async (data: CreateMemberDto) => {
     try {
-      // 🆕 FIXED: Use API client with proper error handling
-      const response = await api.post('/auth/register', data);
-      
-      if (response.data.success) {
-        // Reload users list
-        await loadUsers();
-        setIsModalOpen(false);
-      } else {
-        throw new Error(response.data.message || 'Failed to add team member');
+      if (!data.password) {
+        throw new Error('Password is required');
       }
+      await userService.createUser({
+        ...data,
+        password: data.password
+      });
+      // Reload users list
+      await loadUsers();
+      setIsModalOpen(false);
     } catch (error: any) {
       // Better error message
-      const errorMessage = 
-        error.response?.data?.message || 
-        error.message || 
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
         'Failed to add team member';
-      
+
       throw new Error(errorMessage);
     }
   };
@@ -152,7 +165,7 @@ export const TeamList = () => {
               Manage your organization's team members
             </p>
           </div>
-          
+
           <div className="flex items-center gap-3">
             <button
               onClick={loadUsers}
@@ -162,7 +175,7 @@ export const TeamList = () => {
               <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
               Refresh
             </button>
-            
+
             <button
               onClick={() => setIsModalOpen(true)}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700"
@@ -182,7 +195,7 @@ export const TeamList = () => {
             </div>
             <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
           </div>
-          
+
           <div className="bg-white rounded-lg shadow p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-600">Active</span>
@@ -190,7 +203,7 @@ export const TeamList = () => {
             </div>
             <p className="text-2xl font-bold text-green-600">{stats.active}</p>
           </div>
-          
+
           <div className="bg-white rounded-lg shadow p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-600">Inactive</span>
@@ -317,7 +330,7 @@ export const TeamList = () => {
                         {user.firstName[0]}{user.lastName[0]}
                       </span>
                     </div>
-                    
+
                     {/* Name & Status */}
                     <div>
                       <h3 className="font-semibold text-gray-900">
@@ -325,9 +338,8 @@ export const TeamList = () => {
                       </h3>
                       <div className="flex items-center gap-2 mt-1">
                         <div
-                          className={`w-2 h-2 rounded-full ${
-                            user.active ? 'bg-green-500' : 'bg-gray-400'
-                          }`}
+                          className={`w-2 h-2 rounded-full ${user.active ? 'bg-green-500' : 'bg-gray-400'
+                            }`}
                         />
                         <span className="text-xs text-gray-500">
                           {user.active ? 'Active' : 'Inactive'}
@@ -353,14 +365,14 @@ export const TeamList = () => {
                     <Mail className="h-4 w-4" />
                     <span className="truncate">{user.email}</span>
                   </div>
-                  
+
                   {user.department && (
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Users className="h-4 w-4" />
                       <span>{user.department}</span>
                     </div>
                   )}
-                  
+
                   {user.hourlyRate && (
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Clock className="h-4 w-4" />

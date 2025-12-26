@@ -34,6 +34,7 @@ export interface CreateUserPayload {
   department?: string;
   hourlyRate?: number;
   active?: boolean;
+  password?: string;
 }
 
 const userService = {

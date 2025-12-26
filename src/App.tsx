@@ -93,7 +93,6 @@ function App() {
               <Route path="/team" element={<TeamList />} />
 
               {/* Placeholder Pages */}
-              <Route path="team" element={<PlaceholderPage title="Team" />} />
               <Route path="documents" element={<PlaceholderPage title="Documents" />} />
               <Route path="settings" element={<PlaceholderPage title="Settings" />} />
             </Route>
