@@ -1,5 +1,7 @@
 // src/App.tsx
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ToastProvider } from './contexts/ToastContext';
 import { useAuthStore } from './store/authStore';
@@ -16,6 +18,16 @@ import ProjectList from './pages/Projects/ProjectList';
 import ProjectDetail from './pages/Projects/ProjectDetail';
 import Clients from './pages/Clients';
 import ConnectionTest from './pages/ConnectionTest';
+
+// Create Client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 // Placeholder Pages
 const PlaceholderPage = ({ title }: { title: string }) => (
@@ -51,58 +63,61 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 
 function App() {
   return (
-    <ErrorBoundary>
-      <ToastProvider>
-        <BrowserRouter>
-          <Routes>
+    <QueryClientProvider client={queryClient}>
+      <ErrorBoundary>
+        <ToastProvider>
+          <BrowserRouter>
+            <Routes>
 
-            {/* Public Routes */}
-            <Route path="/test-connection" element={<ConnectionTest />} />
-            <Route
-              path="/login"
-              element={
-                <PublicRoute>
-                  <Login />
-                </PublicRoute>
-              }
-            />
+              {/* Public Routes */}
+              <Route path="/test-connection" element={<ConnectionTest />} />
+              <Route
+                path="/login"
+                element={
+                  <PublicRoute>
+                    <Login />
+                  </PublicRoute>
+                }
+              />
 
-            {/* Protected Routes */}
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <MainLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<Navigate to="/dashboard" replace />} />
-              <Route path="dashboard" element={<Dashboard />} />
+              {/* Protected Routes */}
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route index element={<Navigate to="/dashboard" replace />} />
+                <Route path="dashboard" element={<Dashboard />} />
 
-              {/* Projects */}
-              <Route path="projects" element={<ProjectList />} />
-              <Route path="projects/:id" element={<ProjectDetail />} />
+                {/* Projects */}
+                <Route path="projects" element={<ProjectList />} />
+                <Route path="projects/:id" element={<ProjectDetail />} />
 
-              {/* Clients */}
-              <Route path="clients" element={<Clients />} />
+                {/* Clients */}
+                <Route path="clients" element={<Clients />} />
 
-              {/* Tasks */}
-              <Route path="/tasks" element={<TaskList />} />
+                {/* Tasks */}
+                <Route path="/tasks" element={<TaskList />} />
 
-              {/* Team */}
-              <Route path="/team" element={<TeamList />} />
+                {/* Team */}
+                <Route path="/team" element={<TeamList />} />
 
-              {/* Placeholder Pages */}
-              <Route path="documents" element={<PlaceholderPage title="Documents" />} />
-              <Route path="settings" element={<PlaceholderPage title="Settings" />} />
-            </Route>
+                {/* Placeholder Pages */}
+                <Route path="documents" element={<PlaceholderPage title="Documents" />} />
+                <Route path="settings" element={<PlaceholderPage title="Settings" />} />
+              </Route>
 
-            {/* Catch all */}
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
-          </Routes>
-        </BrowserRouter>
-      </ToastProvider>
-    </ErrorBoundary>
+              {/* Catch all */}
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            </Routes>
+          </BrowserRouter>
+        </ToastProvider>
+      </ErrorBoundary>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   );
 }
 
