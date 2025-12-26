@@ -4,6 +4,7 @@ export type WorkflowStepStatus = 'not_started' | 'in_progress' | 'completed' | '
 
 export interface WorkflowTemplate {
   id: string;
+  organizationId: string;
   name: string;
   description: string | null;
   deliverableType: string;
@@ -27,6 +28,7 @@ export interface WorkflowTemplateStep {
 
 export interface ProjectWorkflow {
   id: string;
+  organizationId: string;
   projectId: string;
   templateId: string;
   createdAt: string;
@@ -51,7 +53,7 @@ export interface ProjectWorkflowStep {
   notes: string | null;
   createdAt: string;
   updatedAt: string;
-  
+
   // Relations
   assignedTo?: {
     id: string;
