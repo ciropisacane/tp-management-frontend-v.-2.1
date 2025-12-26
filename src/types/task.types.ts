@@ -5,6 +5,7 @@ export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
 
 export interface Task {
   id: string;
+  organizationId: string;
   title: string;
   description: string | null;
   status: TaskStatus;
@@ -75,6 +76,7 @@ export interface TaskFilters {
 }
 
 export interface CreateTaskDto {
+  organizationId?: string;
   title: string;
   description?: string;
   status?: TaskStatus;
