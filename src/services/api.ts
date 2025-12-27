@@ -37,13 +37,13 @@ export const handleApiError = (error: AxiosError | unknown): string => {
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = localStorage.getItem('accessToken');
-    
+
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
+
     console.log('📤 API Request:', config.method?.toUpperCase(), config.url);
-    
+
     return config;
   },
   (error: AxiosError) => {
@@ -60,7 +60,7 @@ api.interceptors.response.use(
   },
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
-    
+
     console.error('❌ API Error:', {
       url: error.config?.url,
       status: error.response?.status,
@@ -68,8 +68,8 @@ api.interceptors.response.use(
       data: error.response?.data
     });
 
-    // Handle 401 Unauthorized - Try to refresh token
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Handle 401 Unauthorized - Try to refresh token (SKIP if it's the login request itself)
+    if (error.response?.status === 401 && !originalRequest._retry && !error.config?.url?.includes('/auth/login')) {
       originalRequest._retry = true;
 
       try {
@@ -81,28 +81,28 @@ api.interceptors.response.use(
         );
 
         const { accessToken } = response.data.data;
-        
+
         // Save new token
         localStorage.setItem('accessToken', accessToken);
-        
+
         // Update authorization header
         if (originalRequest.headers) {
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         }
-        
+
         console.log('✅ Token refreshed successfully');
-        
+
         // Retry original request
         return api(originalRequest);
       } catch (refreshError) {
         console.error('❌ Token refresh failed:', refreshError);
-        
+
         // Clear auth data and redirect to login
         localStorage.removeItem('accessToken');
-        
+
         // Dispatch event for auth store to handle
         window.dispatchEvent(new CustomEvent('auth:logout'));
-        
+
         return Promise.reject(refreshError);
       }
     }
