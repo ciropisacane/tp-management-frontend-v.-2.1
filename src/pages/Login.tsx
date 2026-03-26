@@ -6,7 +6,7 @@ import { Lock, Mail, AlertCircle } from 'lucide-react';
 export default function Login() {
   const navigate = useNavigate();
   const { login, isLoading, error, clearError } = useAuthStore();
-  
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -15,7 +15,7 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     clearError();
-    
+
     try {
       await login(formData.email, formData.password);
       navigate('/dashboard');
@@ -100,10 +100,18 @@ export default function Login() {
             </button>
           </form>
 
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <p className="text-xs text-gray-600 text-center">
+          <div className="mt-6 p-4 bg-gray-50 rounded-lg flex flex-col items-center gap-2">
+            <p className="text-xs text-gray-600">
               <strong>Demo:</strong> admin@tpmanager.com / password123
             </p>
+            <button
+              type="button"
+              onClick={() => setFormData({ email: 'admin@tpmanager.com', password: 'password123' })}
+              className="px-4 py-2 text-xs font-medium text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-md transition-colors"
+              title="Riempimento rapido credenziali (Dev)"
+            >
+              Inserisci credenziali di prova
+            </button>
           </div>
         </div>
       </div>
